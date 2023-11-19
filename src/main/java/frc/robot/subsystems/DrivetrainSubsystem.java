@@ -19,24 +19,24 @@ import frc.swerve.SwerveModule;
 
 public class DrivetrainSubsystem extends SubsystemBase {
     private final SwerveModule frontLeft = new SwerveModule(DrivetrainConstants.FL_STEER_ID, DrivetrainConstants.FL_DRIVE_ID,
-            DrivetrainConstants.FL_ABSOLUTE_ENCODER_PORT, DrivetrainConstants.FL_OFFSET_RADIANS,
+            DrivetrainConstants.FL_ABSOLUTE_ENCODER_PORT, DrivetrainConstants.FL_OFFSET_ROTATIONS,
             DrivetrainConstants.FL_ABSOLUTE_ENCODER_REVERSED,
-            DrivetrainConstants.FL_MOTOR_REVERSED);
+            DrivetrainConstants.FL_DRIVE_MOTOR_REVERSED, DrivetrainConstants.FL_STEER_MOTOR_REVERSED);
 
     private final SwerveModule frontRight = new SwerveModule(DrivetrainConstants.FR_STEER_ID, DrivetrainConstants.FR_DRIVE_ID,
-            DrivetrainConstants.FR_ABSOLUTE_ENCODER_PORT, DrivetrainConstants.FR_OFFSET_RADIANS,
+            DrivetrainConstants.FR_ABSOLUTE_ENCODER_PORT, DrivetrainConstants.FR_OFFSET_ROTATIONS,
             DrivetrainConstants.FR_ABSOLUTE_ENCODER_REVERSED,
-            DrivetrainConstants.FR_MOTOR_REVERSED);
+            DrivetrainConstants.FR_DRIVE_MOTOR_REVERSED, DrivetrainConstants.FR_STEER_MOTOR_REVERSED);
 
     private final SwerveModule backRight = new SwerveModule(DrivetrainConstants.BR_STEER_ID, DrivetrainConstants.BR_DRIVE_ID,
-            DrivetrainConstants.BR_ABSOLUTE_ENCODER_PORT, DrivetrainConstants.BR_OFFSET_RADIANS,
+            DrivetrainConstants.BR_ABSOLUTE_ENCODER_PORT, DrivetrainConstants.BR_OFFSET_ROTATIONS,
             DrivetrainConstants.BR_ABSOLUTE_ENCODER_REVERSED,
-            DrivetrainConstants.BR_MOTOR_REVERSED);
+            DrivetrainConstants.BR_DRIVE_MOTOR_REVERSED, DrivetrainConstants.BR_STEER_MOTOR_REVERSED);
 
     private final SwerveModule backLeft = new SwerveModule(DrivetrainConstants.BL_STEER_ID, DrivetrainConstants.BL_DRIVE_ID,
-            DrivetrainConstants.BL_ABSOLUTE_ENCODER_PORT, DrivetrainConstants.BL_OFFSET_RADIANS,
+            DrivetrainConstants.BL_ABSOLUTE_ENCODER_PORT, DrivetrainConstants.BL_OFFSET_ROTATIONS,
             DrivetrainConstants.BL_ABSOLUTE_ENCODER_REVERSED,
-            DrivetrainConstants.BL_MOTOR_REVERSED);
+            DrivetrainConstants.BL_DRIVE_MOTOR_REVERSED, DrivetrainConstants.BL_STEER_MOTOR_REVERSED);
 
     private final AHRS navX = new AHRS(SPI.Port.kMXP);
 
@@ -112,10 +112,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public void setModules(SwerveModuleState[] states) {
         // Normalize speeds so they are all obtainable
         SwerveDriveKinematics.desaturateWheelSpeeds(states, DrivetrainConstants.MAX_MODULE_VELOCITY);
-        frontLeft.setModuleState(states[3]);
+        backRight.setModuleState(states[0]);
         frontRight.setModuleState(states[1]);
         backLeft.setModuleState(states[2]);
-        backRight.setModuleState(states[0]);
+        frontLeft.setModuleState(states[3]);
     }
 
     public void setXstance() {
@@ -126,19 +126,21 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     public ChassisSpeeds getChassisSpeeds() {
-        ChassisSpeeds speeds = DrivetrainConstants.KINEMATICS.toChassisSpeeds(frontLeft.getModuleState(),
-                frontRight.getModuleState(),
-                backLeft.getModuleState(), backRight.getModuleState());
+        ChassisSpeeds speeds = DrivetrainConstants.KINEMATICS.toChassisSpeeds(
+            backRight.getModuleState(),
+            frontRight.getModuleState(),
+            backLeft.getModuleState(),
+            frontLeft.getModuleState());
 
         return speeds;
     }
 
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[4];
-        states[3] = frontLeft.getModulePosition();
+        states[0] = backRight.getModulePosition();
         states[1] = frontRight.getModulePosition();
         states[2] = backLeft.getModulePosition();
-        states[0] = backRight.getModulePosition();
+        states[3] = frontLeft.getModulePosition();
 
         return states;
     }
