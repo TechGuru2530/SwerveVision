@@ -74,23 +74,23 @@ public class ChaseAprilTagCommand extends CommandBase {
            // Handle alignment side-to-side
         var ySpeed = pidControllerY.calculate(pose.getY());
         if (pidControllerY.atSetpoint()) {
-          ySpeed = 0;
+           ySpeed = 0;
         }
   
         // Handle rotation using target Yaw/Z rotation
         var omegaSpeed = pidControllerOmega.calculate(pose.getRotation().getZ());
         if (pidControllerOmega.atSetpoint()) {
-          omegaSpeed = 0;
+           omegaSpeed = 0;
         }
   
-          speeds = new ChassisSpeeds(-xSpeed, -ySpeed, -omegaSpeed);
+          speeds = new ChassisSpeeds(xSpeed, ySpeed, -omegaSpeed);
         
         SwerveModuleState[] calculatedModuleStates = DriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
         swerveSubsystem.setModules(calculatedModuleStates);
     }
     }
     catch(Exception e){
-      visionLayout.add("April tag error", e.getMessage());
+      //visionLayout.add("April tag error", e.getMessage());
     }
   }
 
