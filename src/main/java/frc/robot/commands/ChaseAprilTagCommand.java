@@ -109,7 +109,7 @@ public class ChaseAprilTagCommand extends CommandBase {
         }
         omegaSpeedWidget.getEntry().setValue(omegaSpeed);
   
-        speeds = new ChassisSpeeds(xSpeed, ySpeed, -omegaSpeed);
+        speeds = new ChassisSpeeds(-xSpeed, -ySpeed, -omegaSpeed);
 
         if(VisionConstants.LOG_INTO_FILE_ENABLED){
           String logMessage = "target X: " + pose.getX() + ": ";
