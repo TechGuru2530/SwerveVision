@@ -132,7 +132,6 @@ public final class Constants {
 
     public static final double FIELD_LENGTH_METERS = 16.54175;
     public static final double FIELD_WIDTH_METERS = 8.0137;
-    public static final boolean LOG_INTO_FILE_ENABLED = true;
     
     // Pose on the opposite side of the field. Use with `relativeTo` to flip a pose to the opposite alliance
     public static final Pose2d FLIPPING_POSE = new Pose2d(
@@ -160,6 +159,10 @@ public final class Constants {
     public static final double Y_kP = 1.5;
     public static final double Y_kI = 0.0;
     public static final double Y_kD = 0.0;
+  }
+
+  public static class CommonConstants {
+    public static final boolean LOG_INTO_FILE_ENABLED = false;
   }
   
 }

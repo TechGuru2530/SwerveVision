@@ -7,6 +7,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.CommonConstants;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import edu.wpi.first.util.datalog.StringLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -18,7 +28,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-
+  StringLogEntry myStringLog;
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -28,6 +38,21 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    if(CommonConstants.LOG_INTO_FILE_ENABLED){
+      /// Starts recording to data log
+      String directory = Paths.get("").toAbsolutePath().toString() + "/logs/";
+      try {
+        Files.createDirectories(Path.of(directory));
+        DataLogManager.start(directory);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+      }
+      // Record both DS control and joystick data
+      DriverStation.startDataLog(DataLogManager.getLog());
+      myStringLog = new StringLogEntry(DataLogManager.getLog(), "test");
+    }
+    
   }
 
   /**
@@ -99,5 +124,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    if(CommonConstants.LOG_INTO_FILE_ENABLED){
+      myStringLog.append("In simulationPeriodic");
+    }
+  }
 }

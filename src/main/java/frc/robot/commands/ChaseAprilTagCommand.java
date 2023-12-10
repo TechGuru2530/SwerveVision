@@ -6,14 +6,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.datalog.StringLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.LoggerUtil;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.CommonConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.LimelightConstants;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.limelight.LimelightHelpers;
 import frc.robot.subsystems.SwerveSubsystem;
 import static edu.wpi.first.math.MathUtil.clamp;
@@ -36,6 +37,8 @@ public class ChaseAprilTagCommand extends CommandBase {
     private final SimpleWidget ySpeedWidget;
     private final SimpleWidget omegaSpeedWidget;
     private final SimpleWidget tagErrorWidget;
+
+    StringLogEntry log;
     
     private Logger logger = Logger.getLogger(ChaseAprilTagCommand.class.getName());
 
@@ -71,8 +74,9 @@ public class ChaseAprilTagCommand extends CommandBase {
     pidControllerOmega.setSetpoint(Units.degreesToRadians(180)); // Rotate the keep perpendicular with the target
     pidControllerOmega.setTolerance(Units.degreesToRadians(1));
 
-    LoggerUtil.setupLogger(logger, VisionConstants.LOG_INTO_FILE_ENABLED, "ChaseAprilTagCommand");
-
+    if(CommonConstants.LOG_INTO_FILE_ENABLED){
+      log = new StringLogEntry(DataLogManager.getLog(), "ChaseAprilTagCommand");
+    }
   }
 
   //Need help here does not know how to move robot using limelight co-ordinates
@@ -111,14 +115,14 @@ public class ChaseAprilTagCommand extends CommandBase {
   
         speeds = new ChassisSpeeds(-xSpeed, -ySpeed, -omegaSpeed);
 
-        if(VisionConstants.LOG_INTO_FILE_ENABLED){
+        if(CommonConstants.LOG_INTO_FILE_ENABLED){
           String logMessage = "target X: " + pose.getX() + ": ";
           logMessage += "target Y: " + pose.getY() + ": ";
           logMessage += "target rotation(Z): " + pose.getRotation().getZ() + ": ";
           logMessage += "target xSpeed: " + xSpeed + ": ";
           logMessage += "target ySpeed: " + ySpeed + ": ";
           logMessage += "target rotationSpeed: " + omegaSpeed + ": ";
-          LoggerUtil.LogInfo(logger, VisionConstants.LOG_INTO_FILE_ENABLED, logMessage);
+          log.append(logMessage);
         }
         
         SwerveModuleState[] calculatedModuleStates = DriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
