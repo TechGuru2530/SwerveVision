@@ -39,8 +39,6 @@ public class ChaseAprilTagCommand extends CommandBase {
     private final SimpleWidget tagErrorWidget;
 
     StringLogEntry log;
-    
-    private Logger logger = Logger.getLogger(ChaseAprilTagCommand.class.getName());
 
     public ChaseAprilTagCommand(
         SwerveSubsystem swerveSubsystem,
