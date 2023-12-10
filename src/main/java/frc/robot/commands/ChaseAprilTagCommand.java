@@ -7,13 +7,18 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.LoggerUtil;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.LimelightConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.limelight.LimelightHelpers;
 import frc.robot.subsystems.SwerveSubsystem;
 import static edu.wpi.first.math.MathUtil.clamp;
+
+import java.util.logging.Logger;
 
 public class ChaseAprilTagCommand extends CommandBase {
     
@@ -24,13 +29,34 @@ public class ChaseAprilTagCommand extends CommandBase {
     private final PIDController pidControllerY = new PIDController(AutoConstants.Y_kP, AutoConstants.Y_kI, AutoConstants.Y_kD);
     private final PIDController pidControllerOmega = new PIDController(AutoConstants.THETA_kP, AutoConstants.PATH_THETA_kI, AutoConstants.THETA_kD);
 
+    private final SimpleWidget targetX;
+    private final SimpleWidget targetY;
+    private final SimpleWidget targetZ;
+    private final SimpleWidget xSpeedWidget;
+    private final SimpleWidget ySpeedWidget;
+    private final SimpleWidget omegaSpeedWidget;
+    private final SimpleWidget tagErrorWidget;
+    
+    private Logger logger = Logger.getLogger(ChaseAprilTagCommand.class.getName());
+
     public ChaseAprilTagCommand(
         SwerveSubsystem swerveSubsystem,
         ShuffleboardLayout visionLayout) 
     {
         this.swerveSubsystem = swerveSubsystem;
         this.visionLayout = visionLayout;
+        this.targetX = visionLayout.add("Target X",0);
+        this.targetY = visionLayout.add("Target Y",0);
+        this.targetZ = visionLayout.add("Target Z",0);
+        this.tagErrorWidget = visionLayout.add("Tag Error : ", "");
+        this.xSpeedWidget = visionLayout.add("X Speed",0);
+        this.ySpeedWidget = visionLayout.add("Y Speed",0);
+        this.omegaSpeedWidget = visionLayout.add("Omega Speed",0);
 
+        if(VisionConstants.LOG_INTO_FILE_ENABLED)
+        {
+
+        }
         addRequirements(swerveSubsystem);
   }
 
@@ -50,6 +76,8 @@ public class ChaseAprilTagCommand extends CommandBase {
     pidControllerOmega.setSetpoint(Units.degreesToRadians(180)); // Rotate the keep perpendicular with the target
     pidControllerOmega.setTolerance(Units.degreesToRadians(1));
 
+    LoggerUtil.setupLogger(logger, VisionConstants.LOG_INTO_FILE_ENABLED, "ChaseAprilTagCommand");
+
   }
 
   //Need help here does not know how to move robot using limelight co-ordinates
@@ -61,36 +89,51 @@ public class ChaseAprilTagCommand extends CommandBase {
       LimelightHelpers.LimelightResults results = LimelightHelpers.getLatestResults((LimelightConstants.limeLightName));
      //System.out.println("I am inside april tag command execute");
       if(results.targetingResults.targets_Fiducials.length > 0){
-        Pose3d pose = results.targetingResults.targets_Fiducials[0].getRobotPose_TargetSpace();
-        //visionLayout.add("Target X", pose.getX());
-        //visionLayout.add("Target Y", pose.getY());
-        //visionLayout.add("Target Z", pose.getZ());
+        Pose3d pose = results.targetingResults.targets_Fiducials[0].getTargetPose_RobotSpace();
+        targetX.getEntry().setValue(pose.getX());
+        targetY.getEntry().setValue(pose.getY());
+        targetZ.getEntry().setValue(pose.getRotation().getZ());
         
         var xSpeed = pidControllerX.calculate(pose.getX());
         if (pidControllerX.atSetpoint()) {
           xSpeed = 0;
         }
+        xSpeedWidget.getEntry().setValue(xSpeed);
   
            // Handle alignment side-to-side
         var ySpeed = pidControllerY.calculate(pose.getY());
         if (pidControllerY.atSetpoint()) {
            ySpeed = 0;
         }
-  
+        ySpeedWidget.getEntry().setValue(ySpeed);
+
         // Handle rotation using target Yaw/Z rotation
         var omegaSpeed = pidControllerOmega.calculate(pose.getRotation().getZ());
         if (pidControllerOmega.atSetpoint()) {
            omegaSpeed = 0;
         }
+        omegaSpeedWidget.getEntry().setValue(omegaSpeed);
   
-          speeds = new ChassisSpeeds(xSpeed, ySpeed, -omegaSpeed);
+        speeds = new ChassisSpeeds(xSpeed, ySpeed, -omegaSpeed);
+
+        if(VisionConstants.LOG_INTO_FILE_ENABLED){
+          String logMessage = "target X: " + pose.getX() + ": ";
+          logMessage += "target Y: " + pose.getY() + ": ";
+          logMessage += "target Y: " + pose.getY() + ": ";
+          logMessage += "target rotation(Z): " + pose.getRotation().getZ() + ": ";
+          logMessage += "target xSpeed: " + xSpeed + ": ";
+          logMessage += "target ySpeed: " + ySpeed + ": " + pose.getRotation().getZ() + ": ";
+          logMessage += "target rotationSpeed: " + omegaSpeed + ": ";
+          LoggerUtil.LogInfo(logger, VisionConstants.LOG_INTO_FILE_ENABLED, logMessage);
+          
+        }
         
         SwerveModuleState[] calculatedModuleStates = DriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
         swerveSubsystem.setModules(calculatedModuleStates);
     }
     }
     catch(Exception e){
-      //visionLayout.add("April tag error", e.getMessage());
+      tagErrorWidget.getEntry().setValue(e.getMessage());
     }
   }
 
