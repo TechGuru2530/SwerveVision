@@ -52,11 +52,6 @@ public class ChaseAprilTagCommand extends CommandBase {
         this.xSpeedWidget = visionLayout.add("X Speed",0);
         this.ySpeedWidget = visionLayout.add("Y Speed",0);
         this.omegaSpeedWidget = visionLayout.add("Omega Speed",0);
-
-        if(VisionConstants.LOG_INTO_FILE_ENABLED)
-        {
-
-        }
         addRequirements(swerveSubsystem);
   }
 
