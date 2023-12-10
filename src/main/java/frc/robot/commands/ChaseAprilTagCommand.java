@@ -114,13 +114,11 @@ public class ChaseAprilTagCommand extends CommandBase {
         if(VisionConstants.LOG_INTO_FILE_ENABLED){
           String logMessage = "target X: " + pose.getX() + ": ";
           logMessage += "target Y: " + pose.getY() + ": ";
-          logMessage += "target Y: " + pose.getY() + ": ";
           logMessage += "target rotation(Z): " + pose.getRotation().getZ() + ": ";
           logMessage += "target xSpeed: " + xSpeed + ": ";
-          logMessage += "target ySpeed: " + ySpeed + ": " + pose.getRotation().getZ() + ": ";
+          logMessage += "target ySpeed: " + ySpeed + ": ";
           logMessage += "target rotationSpeed: " + omegaSpeed + ": ";
           LoggerUtil.LogInfo(logger, VisionConstants.LOG_INTO_FILE_ENABLED, logMessage);
-          
         }
         
         SwerveModuleState[] calculatedModuleStates = DriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
